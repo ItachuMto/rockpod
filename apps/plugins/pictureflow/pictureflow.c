@@ -766,7 +766,7 @@ static void config_set_defaults(struct pf_config_t *cfg)
      cfg->slide_spacing = DISPLAY_WIDTH / 4;  /* kept for config compat */
      cfg->center_margin = 0;
      cfg->slide_tuck = DISPLAY_WIDTH / 4;
-     cfg->num_slides = 4;   /* 3 visible + 1 animation buffer per side */
+     cfg->num_slides = 2;   /* 3 visible + 1 animation buffer per side */
      cfg->zoom = 100;
      cfg->show_fps = false;
      cfg->auto_wps = 0;
@@ -3080,7 +3080,7 @@ static void recalc_offsets(void)
         PFreal span = cx_last - offsetX;
         if (span < PFREAL_ONE)
             span = PFREAL_ONE;
-        auto_slide_spacing = span / 2;
+        auto_slide_spacing = span;
     }
 }
 
