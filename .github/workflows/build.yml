@@ -13,33 +13,32 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install dependencies and ARM toolchain
         run: |
           sudo apt update
           sudo apt install -y build-essential gcc g++ make zip libsdl1.2-dev \
             texinfo flex bison libgmp-dev libmpfr-dev libmpc-dev \
-            libtool libtool-bin automake autoconf pkg-config curl
+            libtool libtool-bin automake autoconf pkg-config curl \
+            gcc-arm-none-eabi binutils-arm-none-eabi libnewlib-arm-none-eabi
 
-      - name: Build ARM toolchain
-        run: |
-          echo "a" | tools/rockboxdev.sh
-          # Exportar todas las rutas posibles donde rockboxdev instala los ejecutables
-          for dir in /usr/local/arm-elf-eabi/bin /usr/local/arm-elf/bin /usr/local/arm/bin; do
-            if [ -d "$dir" ]; then
-              echo "$dir" >> $GITHUB_PATH
-              echo "Toolchain encontrada en: $dir"
+          # Crear enlaces simbolicos para que el sistema encuentre arm-elf-eabi-*
+          for tool in gcc g++ cpp ld ar as nm objcopy objdump ranlib strip size; do
+            if which arm-none-eabi-$tool >/dev/null 2>&1; then
+              sudo ln -sf $(which arm-none-eabi-$tool) /usr/local/bin/arm-elf-eabi-$tool
+              sudo ln -sf $(which arm-none-eabi-$tool) /usr/local/bin/arm-elf-$tool
             fi
           done
 
+      - name: Verify Compiler
+        run: |
+          which arm-elf-eabi-gcc
+          arm-elf-eabi-gcc --version
+
       - name: Build iPod Video Firmware
         run: |
-          # Verificar que el compilador este accesible
-          which arm-elf-eabi-gcc || which arm-elf-gcc || true
-          
-          # Crear directorio y configurar manualmente para evitar el bug de sysctl
           mkdir -p build-hw-ipodvideo
           cd build-hw-ipodvideo
-          ../tools/configure --target=ipodvideo --type=normal
+          echo "64" | ../tools/configure --target=ipodvideo --type=normal
           make -j$(nproc)
           make zip
 
