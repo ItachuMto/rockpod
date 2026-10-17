@@ -21,7 +21,7 @@ jobs:
             libtool libtool-bin automake autoconf pkg-config curl \
             gcc-arm-none-eabi binutils-arm-none-eabi libnewlib-arm-none-eabi
 
-          # Crear enlaces simbolicos para que el sistema encuentre arm-elf-eabi-*
+          # Crear enlaces simbolicos para herramientas estandar
           for tool in gcc g++ cpp ld ar as nm objcopy objdump ranlib strip size; do
             if which arm-none-eabi-$tool >/dev/null 2>&1; then
               sudo ln -sf $(which arm-none-eabi-$tool) /usr/local/bin/arm-elf-eabi-$tool
@@ -29,10 +29,19 @@ jobs:
             fi
           done
 
-      - name: Verify Compiler
+          # Crear enlaces especificos para envoltorios LTO/GCC de binutils que Rockbox invoca
+          sudo ln -sf $(which arm-none-eabi-ar) /usr/local/bin/arm-elf-eabi-gcc-ar
+          sudo ln -sf $(which arm-none-eabi-ar) /usr/local/bin/arm-elf-gcc-ar
+          sudo ln -sf $(which arm-none-eabi-nm) /usr/local/bin/arm-elf-eabi-gcc-nm
+          sudo ln -sf $(which arm-none-eabi-nm) /usr/local/bin/arm-elf-gcc-nm
+          sudo ln -sf $(which arm-none-eabi-ranlib) /usr/local/bin/arm-elf-eabi-gcc-ranlib
+          sudo ln -sf $(which arm-none-eabi-ranlib) /usr/local/bin/arm-elf-gcc-ranlib
+
+      - name: Verify Toolchain
         run: |
           which arm-elf-eabi-gcc
-          arm-elf-eabi-gcc --version
+          which arm-elf-eabi-gcc-ar
+          arm-elf-eabi-gcc-ar --version
 
       - name: Build iPod Video Firmware
         run: |
