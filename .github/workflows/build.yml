@@ -23,12 +23,23 @@ jobs:
       - name: Build ARM toolchain
         run: |
           echo "a" | tools/rockboxdev.sh
-          echo "/usr/local/arm-elf/bin" >> $GITHUB_PATH
+          # Exportar todas las rutas posibles donde rockboxdev instala los ejecutables
+          for dir in /usr/local/arm-elf-eabi/bin /usr/local/arm-elf/bin /usr/local/arm/bin; do
+            if [ -d "$dir" ]; then
+              echo "$dir" >> $GITHUB_PATH
+              echo "Toolchain encontrada en: $dir"
+            fi
+          done
 
       - name: Build iPod Video Firmware
         run: |
-          ./build-hw.sh 5g
+          # Verificar que el compilador este accesible
+          which arm-elf-eabi-gcc || which arm-elf-gcc || true
+          
+          # Crear directorio y configurar manualmente para evitar el bug de sysctl
+          mkdir -p build-hw-ipodvideo
           cd build-hw-ipodvideo
+          ../tools/configure --target=ipodvideo --type=normal
           make -j$(nproc)
           make zip
 
