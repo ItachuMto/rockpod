@@ -1,0 +1,37 @@
+name: Build Rockpod for iPod Video
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "master", "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential gcc g++ make zip libsdl1.2-dev texinfo flex bison libgmp-dev libmpfr-dev libmpc-dev
+
+      - name: Build ARM toolchain
+        run: |
+          echo "a" | tools/rockboxdev.sh
+          echo "/usr/local/arm-elf/bin" >> $GITHUB_PATH
+
+      - name: Build iPod Video Firmware
+        run: |
+          ./build-hw.sh 5g
+          cd build-hw-ipodvideo
+          make -j$(nproc)
+          make zip
+
+      - name: Upload rockbox.zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: rockbox-ipodvideo-custom
+          path: build-hw-ipodvideo/*.zip
