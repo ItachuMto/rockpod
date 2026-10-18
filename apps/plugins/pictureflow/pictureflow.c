@@ -3,7 +3,7 @@
 *   Open      \______   \ ____   ____ |  | _\_ |__   _______  ___
 *   Source     |       _//  _ \_/ ___\|  |/ /| __ \ /  _ \  \/  /
 *   Jukebox    |    |   (  <_> )  \___|    < | \_\ (  <_> > <  <
-*   Firmware   |____|_  /\____/ \___  >__|_ \|___  /\____/__/\_ \F
+*   Firmware   |____|_  /\____/ \___  >__|_ \|___  /\____/__/\_ \
 *                     \/            \/     \/    \/            \/
 * $Id$
 *
@@ -3229,7 +3229,7 @@ static void render_slide(struct slide_data *slide, const int alpha)
     const bool perspective = (zo != 0 || slide->angle != 0);
     const int p_start_upper = (sh - 1 - display_offs) * PFREAL_ONE;
     const int p_start_lower = (sh - display_offs) * PFREAL_ONE;
-    const int plim2_max = MIN(sh + reflect_height, sh * 2) * PFREAL_ONE;
+    const int plim2_max = sh * PFREAL_ONE;
     for (x = xi; x < w; x++) {
         if (xs < slide_left)
             xs = slide_left;
@@ -4914,8 +4914,8 @@ static bool init(void)
     pf_height = pf_cfg.show_statusbar ? pf_vp.height : LCD_HEIGHT;
     pf_half_height = LCD_HEIGHT / 2 - pf_vp_y + (pf_cfg.show_statusbar ? 8 : 0);
     pf_lower_half = pf_height - pf_half_height;
-    pf_reflect_height = REFLECT_HEIGHT;
-    pf_display_offs = DISPLAY_OFFS;
+    pf_reflect_height = 0;
+    pf_display_offs = 0;
 
 #ifdef HAVE_LCD_COLOR
     pf_bg_color = (pix_t)rb->global_settings->bg_color;
