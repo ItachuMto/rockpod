@@ -3,7 +3,7 @@
 *   Open      \______   \ ____   ____ |  | _\_ |__   _______  ___
 *   Source     |       _//  _ \_/ ___\|  |/ /| __ \ /  _ \  \/  /
 *   Jukebox    |    |   (  <_> )  \___|    < | \_\ (  <_> > <  <
-*   Firmware   |____|_  /\____/ \___  >__|_ \|___  /\____/__/\_ \
+*   Firmware   |____|_  /\____/ \___  >__|_ \|___  /\____/__/\_ \F
 *                     \/            \/     \/    \/            \/
 * $Id$
 *
@@ -282,9 +282,9 @@ static inline pix_t pf_color_mix(int brightness)
 #define IANGLE_MAX 1024
 #define IANGLE_MASK 1023
 
-#define REFLECT_TOP (LCD_HEIGHT * 2 / 3)
-#define REFLECT_HEIGHT (LCD_HEIGHT - REFLECT_TOP)
-#define DISPLAY_HEIGHT REFLECT_TOP
+#define REFLECT_TOP (LCD_HEIGHT - 40)
+#define REFLECT_HEIGHT 0
+#define DISPLAY_HEIGHT (LCD_HEIGHT - 40)
 #define DISPLAY_WIDTH MAX((LCD_HEIGHT * LCD_PIXEL_ASPECT_HEIGHT / \
     LCD_PIXEL_ASPECT_WIDTH / 2), (LCD_WIDTH * 2 / 5))
 #define REFLECT_SC ((0x10000U * 3 + (REFLECT_HEIGHT * 5 - 1)) / \
@@ -3173,17 +3173,19 @@ static void render_slide(struct slide_data *slide, const int alpha)
     const PFreal slide_left = -sw * PFREAL_HALF + PFREAL_HALF;
     const int w = LCD_WIDTH;
 
-    uint8_t reftab[REFLECT_HEIGHT]; /* on stack, which is in IRAM on several targets */
+    /*
+    uint8_t reftab[REFLECT_HEIGHT];
 
-    if (alpha == 256) { /* opaque -> copy table */
+    if (alpha == 256) {
         rb->memcpy(reftab, reflect_table, pf_reflect_height);
-    } else {            /* precalculate faded table */
+    } else {
         int i, lalpha;
         for (i = 0; i < pf_reflect_height; i++) {
             lalpha = reflect_table[i];
             reftab[i] = (MULUQ(lalpha, alpha) + 129) >> 8;
         }
     }
+    */
 
     PFreal cosr = fcos(slide->angle);
     PFreal sinr = fsin(slide->angle);
@@ -3283,6 +3285,7 @@ static void render_slide(struct slide_data *slide, const int alpha)
                 pixel += PIXELSTEP_Y;
             }
         }
+        /* ELIMINAR REFLEJO PARA QUITAR LAG EN IPOD:
         while (p < plim2) {
             int ty = (((unsigned)p) >> PFREAL_SHIFT) - sh;
             int lalpha = reftab[ty];
@@ -3290,6 +3293,7 @@ static void render_slide(struct slide_data *slide, const int alpha)
             p += dy;
             pixel += PIXELSTEP_Y;
         }
+        */
 
         if (perspective)
         {
